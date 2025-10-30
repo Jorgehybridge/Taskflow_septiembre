@@ -2,7 +2,7 @@
 # git add "SRC/database.py"
 
 import sqlite3
-from modelos import Tarea, Proyecto
+from .modelos import Tarea, Proyecto
 import os
 
 DATABASE_NAME = 'tareas.db'
@@ -45,37 +45,47 @@ def crear_tabla():
 
 
 
-def crear_tarea(self, tarea: Tarea) -> Tarea:
-    conn = get_connection()
-    cursor = conn.cursor()
-    
-    cursor.execute("""
-        INSERT INTO tareas (titulo, descripcion, fecha_creacion, fecha_limite, prioridad, estado, proyecto_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (tarea._titulo, tarea._descripcion, tarea._fecha_creacion, tarea._fecha_limite, tarea._prioridad, tarea._estado, tarea._proyecto_id))
-    
-    tarea.id = cursor.lastrowid
-    conn.commit()
-    conn.close()
-    return tarea
+# Module-level helper removed; use DBManager.agregar_tarea instead
 class DBManager:
     def __init__(self, db_name=DATABASE_NAME):
         self.db_name = db_name
         if not os.path.exists(self.db_name):
             crear_tabla()
-    def crear_tarea(self, tarea: Tarea) -> Tarea:
+    def agregar_tarea(self, tarea: Tarea) -> Tarea:
+        """Insert a Tarea into the tareas table and return it with id set."""
         conn = get_connection()
         cursor = conn.cursor()
-        
+
         cursor.execute("""
             INSERT INTO tareas (titulo, descripcion, fecha_creacion, fecha_limite, prioridad, estado, proyecto_id)
             VALUES (?, ?, ?, ?, ?, ?, ?)
         """, (tarea._titulo, tarea._descripcion, tarea._fecha_creacion, tarea._fecha_limite, tarea._prioridad, tarea._estado, tarea._proyecto_id))
-        
+
         tarea.id = cursor.lastrowid
         conn.commit()
         conn.close()
         return tarea
+    
+
+    
+
+    def actualizar_tarea(self, tarea_id: int) -> bool:
+        """Mark the tarea with given id as completed.
+
+        Returns True if a row was updated, False otherwise.
+        """
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE tareas
+            SET estado = ?
+            WHERE id = ?
+        """, ("Completada", tarea_id))
+        updated = cursor.rowcount
+        conn.commit()
+        conn.close()
+        return updated > 0
+    
     def  obtener_proyectos(self):
         conn = get_connection()
         cursor = conn.cursor()
@@ -93,6 +103,33 @@ class DBManager:
             proyectos.append(proyecto)
         conn.close()
         return proyectos
+    
+    def obtener_tareas(self, estado: str = None):
+        conn = get_connection()
+        cursor = conn.cursor()
+        sql="SELECT * FROM tareas"
+        params=[]    
+        if estado:
+            sql += " WHERE estado = ?"
+            params.append(estado)
+        sql += " ORDER BY fecha_limite ASC"
+        cursor.execute(sql, params)
+        filas = cursor.fetchall()
+        tareas = []
+        for fila in filas:
+            tarea = Tarea(
+                id=fila['id'],
+                titulo=fila['titulo'],
+                descripcion=fila['descripcion'],
+                fecha_limite=fila['fecha_limite'],
+                prioridad=fila['prioridad'],
+                estado=fila['estado'],
+                proyecto_id=fila['proyecto_id']
+            )
+            tareas.append(tarea)
+        conn.close()
+        return tareas
+    
 if __name__ == '__main__':
     # Bloque de prueba para la clase
     if os.path.exists(DATABASE_NAME):
@@ -112,5 +149,5 @@ if __name__ == '__main__':
         descripcion="Implementar el módulo database.py"
     )
     
-    tarea_creada = manager.crear_tarea(tarea_prueba)
+    tarea_creada = manager.crear_tabla(tarea_prueba)
     print(f"Tarea creada y ID asignado: {tarea_creada.id}")

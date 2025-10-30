@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Agregar Tarea</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div style="max-width:860px;margin:40px auto;">
+            <a href="{{ url_for('index') }}" class="add-link">← Volver al listado</a>
+            <div class="card form-container">
+                <h1 style="margin-top:0; margin-bottom:8px; font-size:22px;">Nueva tarea</h1>
+                <p style="color:#6b7280; margin-top:0; margin-bottom:16px;">Completa los datos para crear una nueva tarea.</p>
+
+                <form method="post" action="{{ url_for('agregar_tarea') }}">
+                    <div class="form-row">
+                        <label for="titulo">Título</label>
+                        <input id="titulo" name="titulo" type="text" placeholder="Ej: Preparar presentación" required>
+                    </div>
+
+                    <div class="form-row">
+                        <label for="descripcion">Descripción</label>
+                        <textarea id="descripcion" name="descripcion" rows="3" placeholder="Detalles de la tarea (opcional)"></textarea>
+                    </div>
+
+                    <div class="form-row" style="display:flex; gap:12px;">
+                        <div style="flex:1">
+                              <label for="fecha_limite">Fecha de entrega</label>
+                              <input id="fecha_limite" name="fecha_limite" type="date">
+                        </div>
+                        <div style="width:180px">
+                            <label for="prioridad">Prioridad</label>
+                            <select id="prioridad" name="prioridad">
+                                <option value="Baja">Baja</option>
+                                <option value="Media" selected>Media</option>
+                                <option value="Alta">Alta</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                                    <label for="proyecto_id">Proyecto</label>
+                                    <select id="proyecto_id" name="proyecto_id">
+                                        {% for proyecto in proyectos %}
+                                            <option value="{{ proyecto._id }}">{{ proyecto._nombre }}</option>
+                                        {% endfor %}
+                                    </select>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="btn-primary" type="submit">Guardar tarea</button>
+                        <a class="link-muted" href="{{ url_for('index') }}">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

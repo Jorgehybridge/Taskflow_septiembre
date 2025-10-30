@@ -6,12 +6,16 @@ class Proyecto: #Esta clase nos ayudará a diferenciar entre proyectos para univ
     """
     Clase que representa un proyecto. Usa POO: Encapsulamiento con guion bajo.
     """
-    def __init__(self, nombre: str, descripcion: str = "", id: int = None, estado: str = "Activo"):
+    def __init__(self, nombre: str, descripcion: str = "", id: int = None, fecha_inicio: str | None = None, estado: str = "Activo"):
         # Atributos internos (encapsulados)
         self._id = id
         self._nombre = nombre
         self._descripcion = descripcion
-        self._fecha_inicio = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # Permitir pasar una fecha existente (desde la DB) o usar ahora
+        if fecha_inicio:
+            self._fecha_inicio = fecha_inicio
+        else:
+            self._fecha_inicio = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self._estado = estado
 
     @property   #propiedades
@@ -79,4 +83,4 @@ class Tarea:
             'prioridad': self._prioridad,
             'estado': self._estado,
             'proyecto_id': self._proyecto_id
-        }
+    }
